@@ -14,6 +14,9 @@ async function bootstrap() {
     }),
   );
 
+  // Configurar Swagger
+  AppModule.setupSwagger(app);
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

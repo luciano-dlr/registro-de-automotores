@@ -1,11 +1,10 @@
 import {
   Injectable,
-  Inject,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Automotor } from './entities/automotor.entity';
 import { ObjetoDeValor } from '../objeto-valor/entities/objeto-valor.entity';
 import { Sujeto } from '../sujetos/entities/sujeto.entity';
@@ -24,8 +23,6 @@ export class AutomotoresService {
     private sujetoRepository: Repository<Sujeto>,
     @InjectRepository(Vinculo)
     private vinculoRepository: Repository<Vinculo>,
-    @Inject('DATA_SOURCE')
-    private dataSource: DataSource,
   ) {}
 
   async findAll(): Promise<any[]> {
@@ -36,14 +33,13 @@ export class AutomotoresService {
     // Para cada automotor, buscar el vínculo activo
     const resultado = await Promise.all(
       automotoress.map(async (automotor) => {
-        const vinculoActivo = await this.vinculoRepository.findOne({
-          where: {
-            vso_ovp_id: automotor.atr_ovp_id,
-            vso_responsable: 'S',
-            vso_fecha_fin: undefined as any,
-          },
-          relations: ['sujeto'],
-        });
+        const vinculoActivo = await this.vinculoRepository
+          .createQueryBuilder('v')
+          .leftJoinAndSelect('v.sujeto', 'sujeto')
+          .where('v.vso_ovp_id = :ovpId', { ovpId: automotor.atr_ovp_id })
+          .andWhere('v.vso_responsable = :responsable', { responsable: 'S' })
+          .andWhere('v.vso_fecha_fin IS NULL')
+          .getOne();
 
         return {
           dominio: automotor.atr_dominio,
@@ -73,13 +69,13 @@ export class AutomotoresService {
       );
     }
 
-    const vinculoActivo = await this.vinculoRepository.findOne({
-      where: {
-        vso_ovp_id: automotor.atr_ovp_id,
-        vso_responsable: 'S',
-      },
-      relations: ['sujeto'],
-    });
+    const vinculoActivo = await this.vinculoRepository
+      .createQueryBuilder('v')
+      .leftJoinAndSelect('v.sujeto', 'sujeto')
+      .where('v.vso_ovp_id = :ovpId', { ovpId: automotor.atr_ovp_id })
+      .andWhere('v.vso_responsable = :responsable', { responsable: 'S' })
+      .andWhere('v.vso_fecha_fin IS NULL')
+      .getOne();
 
     return {
       dominio: automotor.atr_dominio,
@@ -185,7 +181,7 @@ export class AutomotoresService {
     const { numeroChasis, numeroMotor, color, fechaFabricacion, cuitDueno } =
       updateAutomotorDto;
 
-    // Actualizar datos del automotor
+    // Actualizar datos del automotor solo si hay campos para actualizar
     const updateData: Partial<Automotor> = {};
     if (numeroChasis !== undefined)
       updateData.atr_numero_chasis = numeroChasis.toUpperCase();
@@ -195,7 +191,10 @@ export class AutomotoresService {
     if (fechaFabricacion !== undefined)
       updateData.atr_fecha_fabricacion = fechaFabricacion;
 
-    await this.automotorRepository.update(automotor.atr_id, updateData);
+    // Solo ejecutar update si hay datos para actualizar
+    if (Object.keys(updateData).length > 0) {
+      await this.automotorRepository.update(automotor.atr_id, updateData);
+    }
 
     // Si se envía un nuevo CUIT, reasignar dueño
     if (cuitDueno) {
@@ -207,19 +206,23 @@ export class AutomotoresService {
         throw new UnprocessableEntityException('CUIT no registrado');
       }
 
-      // Cerrar vínculo activo actual
-      const vinculoActivo = await this.vinculoRepository.findOne({
-        where: {
-          vso_ovp_id: automotor.atr_ovp_id,
-          vso_responsable: 'S',
-        },
-      });
+      // Cerrar vínculo activo actual - usar query builder para manejar NULL correctamente
+      const vinculoActivo = await this.vinculoRepository
+        .createQueryBuilder('v')
+        .where('v.vso_ovp_id = :ovpId', { ovpId: automotor.atr_ovp_id })
+        .andWhere('v.vso_responsable = :responsable', { responsable: 'S' })
+        .andWhere('v.vso_fecha_fin IS NULL')
+        .getOne();
 
       if (vinculoActivo) {
         const today = new Date();
-        await this.vinculoRepository.update(vinculoActivo.vso_id, {
-          vso_fecha_fin: today,
-        });
+        // Usar query builder para update
+        await this.vinculoRepository
+          .createQueryBuilder()
+          .update(Vinculo)
+          .set({ vso_fecha_fin: today })
+          .where('vso_id = :id', { id: vinculoActivo.vso_id })
+          .execute();
       }
 
       // Crear nuevo vínculo
