@@ -1,0 +1,1 @@
+nest new registro-de-automotores --strict --package-manager npm
