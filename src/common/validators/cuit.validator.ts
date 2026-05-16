@@ -38,11 +38,21 @@ export function IsCuit(validationOptions?: ValidationOptions) {
  * Función utilitaria para validar CUIT (sin decorador)
  */
 export function validarCuit(cuit: string): boolean {
+  // Verificar que no sea null, undefined o string vacío
+  if (!cuit || typeof cuit !== 'string') {
+    return false;
+  }
+
   // Limpiar el CUIT (solo dígitos)
   const cleanCuit = cuit.replace(/\D/g, '');
 
   // Debe tener exactamente 11 dígitos
   if (cleanCuit.length !== 11) {
+    return false;
+  }
+
+  // Verificar que no sean todos ceros
+  if (/^0+$/.test(cleanCuit)) {
     return false;
   }
 
