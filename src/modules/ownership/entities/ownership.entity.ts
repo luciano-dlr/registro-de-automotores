@@ -6,11 +6,11 @@ import {
   JoinColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { ObjetoDeValor } from '../../objeto-valor/entities/objeto-valor.entity';
-import { Sujeto } from '../../sujetos/entities/sujeto.entity';
+import { ObjectValue } from '../../object-value/entities/object-value.entity';
+import { Subject } from '../../subject/entities/subject.entity';
 
 @Entity('Vinculo_Sujeto_Objeto')
-export class Vinculo {
+export class Ownership {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   vso_id: number;
 
@@ -38,13 +38,13 @@ export class Vinculo {
   @CreateDateColumn({ type: 'timestamptz', default: () => 'NOW()' })
   created_at: Date;
 
-  @ManyToOne(() => ObjetoDeValor, (ov) => ov.vinculos, { onDelete: 'CASCADE' })
+  @ManyToOne(() => ObjectValue, (ov) => ov.vinculos, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'vso_ovp_id' })
-  objetoValor: ObjetoDeValor;
+  objetoValor: ObjectValue;
 
-  @ManyToOne(() => Sujeto, (sujeto) => sujeto.vinculos, {
+  @ManyToOne(() => Subject, (Subject) => Subject.vinculos, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'vso_spo_id' })
-  sujeto: Sujeto;
+  sujeto: Subject;
 }

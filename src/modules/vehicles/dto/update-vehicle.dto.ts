@@ -1,22 +1,14 @@
 import {
   IsString,
-  IsNotEmpty,
   IsOptional,
   IsNumber,
   MaxLength,
   Min,
 } from 'class-validator';
-import { IsDominio } from '../../../common/validators/dominio.validator';
 import { IsCuit } from '../../../common/validators/cuit.validator';
-import { IsFechaFabricacion } from '../../../common/validators/fecha-fabricacion.validator';
+import { IsManufacturingDate } from '../../../common/validators/date-manufacturing.validator';
 
-export class CreateAutomotorDto {
-  @IsDominio()
-  @IsString()
-  @IsNotEmpty({ message: 'El dominio es obligatorio' })
-  @MaxLength(8)
-  dominio: string;
-
+export class UpdateVehicleDto {
   @IsOptional()
   @IsString()
   @MaxLength(25, {
@@ -36,13 +28,14 @@ export class CreateAutomotorDto {
   @MaxLength(40, { message: 'El color no puede exceder 40 caracteres' })
   color?: string;
 
-  @IsFechaFabricacion()
+  @IsOptional()
+  @IsManufacturingDate()
   @IsNumber({}, { message: 'La fecha de fabricación debe ser un número' })
   @Min(190001, { message: 'La fecha de fabricación debe ser mayor a 190000' })
-  fechaFabricacion: number;
+  fechaFabricacion?: number;
 
+  @IsOptional()
   @IsCuit()
   @IsString()
-  @IsNotEmpty({ message: 'El CUIT del dueño es obligatorio' })
-  cuitDueno: string;
+  cuitDueno?: string;
 }

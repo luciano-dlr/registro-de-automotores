@@ -4,6 +4,7 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { Response } from 'express';
 
@@ -13,34 +14,89 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    // Manejar errores de class-validator (BadRequestException)
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
 
-      // Si es un error de validación (422 o 400)
-      if (
-        status === HttpStatus.BAD_REQUEST ||
-        status === HttpStatus.UNPROCESSABLE_ENTITY
-      ) {
-        const message =
+      if (exception instanceof BadRequestException) {
+        let rawMessage: unknown =
           typeof exceptionResponse === 'object'
-            ? (exceptionResponse as any).message || exceptionResponse
+            ? ((exceptionResponse as { message?: unknown }).message ??
+              exceptionResponse)
             : exceptionResponse;
+
+        let finalMessage: string[];
+        if (Array.isArray(rawMessage)) {
+          const filtered = rawMessage.filter(
+            (m: unknown) => m && typeof m === 'string' && m.trim() !== '',
+          );
+          finalMessage =
+            filtered.length > 0 ? filtered : ['Error de validación'];
+        } else if (typeof rawMessage === 'string') {
+          finalMessage = [rawMessage];
+        } else {
+          finalMessage = ['Error de validación'];
+        }
 
         return response.status(HttpStatus.UNPROCESSABLE_ENTITY).json({
           statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-          message: Array.isArray(message) ? message : [message],
+          message: finalMessage,
           error: 'Unprocessable Entity',
         });
       }
 
-      // Para otros errores HTTP, dejar el comportamiento por defecto
+      if (status === HttpStatus.UNPROCESSABLE_ENTITY) {
+        let rawMessage: unknown =
+          typeof exceptionResponse === 'object'
+            ? ((exceptionResponse as { message?: unknown }).message ??
+              exceptionResponse)
+            : exceptionResponse;
+
+        let finalMessage: string[];
+        if (Array.isArray(rawMessage)) {
+          const filtered = rawMessage.filter(
+            (m: unknown) => m && typeof m === 'string' && m.trim() !== '',
+          );
+          finalMessage =
+            filtered.length > 0 ? filtered : ['Error de validación'];
+        } else if (typeof rawMessage === 'string') {
+          finalMessage = [rawMessage];
+        } else {
+          finalMessage = ['Error de validación'];
+        }
+
+        return response.status(HttpStatus.UNPROCESSABLE_ENTITY).json({
+          statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+          message: finalMessage,
+          error: 'Unprocessable Entity',
+        });
+      }
+
       return response.status(status).json(exceptionResponse);
     }
 
-    // Manejar errores no esperados
     console.error('Unexpected error:', exception);
+
+    if (exception instanceof Error) {
+      const errorMessage = exception.message;
+
+      if (
+        errorMessage.includes('duplicate') ||
+        errorMessage.includes('unique')
+      ) {
+        return response.status(HttpStatus.CONFLICT).json({
+          statusCode: HttpStatus.CONFLICT,
+          message: 'El dominio ya existe',
+          error: 'Conflict',
+        });
+      }
+
+      return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: errorMessage || 'Internal server error',
+        error: 'Internal Server Error',
+      });
+    }
 
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,

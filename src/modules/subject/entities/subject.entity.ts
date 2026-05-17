@@ -6,10 +6,10 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { Vinculo } from '../../vinculo/entities/vinculo.entity';
+import { Ownership } from '../../ownership/entities/ownership.entity';
 
 @Entity('Sujeto')
-export class Sujeto {
+export class Subject {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   spo_id: number;
 
@@ -25,6 +25,6 @@ export class Sujeto {
   @UpdateDateColumn({ type: 'timestamptz', default: () => 'NOW()' })
   updated_at: Date;
 
-  @OneToMany(() => Vinculo, (vinculo) => vinculo.sujeto)
-  vinculos: Vinculo[];
+  @OneToMany(() => Ownership, (Ownership) => Ownership.sujeto)
+  vinculos: Ownership[];
 }
