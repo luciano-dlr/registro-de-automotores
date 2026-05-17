@@ -2,21 +2,25 @@
 
 Challenge técnico Mindfactory - NestJS + TypeORM + PostgreSQL
 
-##  Cómo levantar el proyecto
+## Cómo levantar el proyecto
 
-### Con Docker (recomendado)
+### Con Docker (recomendado) - 1 solo comando
 
 ```bash
 # 1. Clonar el repositorio
 git clone <repo-url>
 cd registro-de-automotores
 
-# 2. Levantar servicios (db + api)
+# 2. Levantar servicios (db + api + índice único automático)
 docker compose up -d --build
 
 # 3. Verificar que esté funcionando
-curl http://localhost:3000/api/automotores
+curl http://localhost:3000
 ```
+
+**¡Listo!** No necesitas ejecutar nada más. El script de inicialización (`docker/postgres-init.sql`) se ejecuta automáticamente al crear la base de datos y crea:
+
+- Índice único para garantizar un solo dueño activo por vehículo
 
 ### Sin Docker (desarrollo local)
 
@@ -30,6 +34,7 @@ docker run -d --name automotores_db \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=postgres \
   -p 5432:5432 \
+  -v $(pwd)/docker/postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql:ro \
   postgres:16
 
 # 3. Crear archivo .env (copiar de .env.example)
@@ -41,7 +46,7 @@ npm run start:dev
 # La API estará disponible en http://localhost:3000
 ```
 
-##  Cómo correr los tests
+## Cómo correr los tests
 
 ```bash
 # Todos los tests
@@ -54,7 +59,7 @@ npm run test:cov
 npm run test:watch
 ```
 
-##  Endpoints principales
+## Endpoints principales
 
 | Método   | Ruta                                    | Descripción                              |
 | -------- | --------------------------------------- | ---------------------------------------- |
@@ -101,7 +106,7 @@ curl -X POST http://localhost:3000/api/automotores \
 curl http://localhost:3000/api/automotores
 ```
 
-##  Credenciales
+## Credenciales
 
 | Variable    | Valor por defecto |
 | ----------- | ----------------- |
@@ -112,7 +117,7 @@ curl http://localhost:3000/api/automotores
 | DB_NAME     | automotores_db    |
 | PORT        | 3000              |
 
-##  Validaciones implementadas
+## Validaciones implementadas
 
 - **Dominio**: Formato `AAA999` (ej: ABC123) o `AA999AA` (ej: AB123CD)
 - **CUIT**: 11 dígitos con dígito verificador (algoritmo módulo 11)
@@ -120,7 +125,7 @@ curl http://localhost:3000/api/automotores
 
 Errores de validación retornan `422 Unprocessable Entity`.
 
-##  Arquitectura
+## Arquitectura
 
 ```
 │ ├── modules/
@@ -152,7 +157,7 @@ Errores de validación retornan `422 Unprocessable Entity`.
 │ │ └── ownership.entity.ts @Entity('Vinculo_Sujeto_Objeto')
 ```
 
-##  Decisiones de diseño
+## Decisiones de diseño
 
 Ver [docs/DECISION_LOG.md](docs/DECISION_LOG.md) para más detalles sobre las decisiones técnicas.
 

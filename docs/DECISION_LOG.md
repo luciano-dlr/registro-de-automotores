@@ -20,7 +20,7 @@
 ---
 
 En un principio trabaje con una declaracion de los modulos con la logica de negocio planteada , al visualizar espaniol e ingles en el challenge
-
+```
 │ ├── modules/
 │ │ ├── sujetos/
 │ │ │ ├── sujetos.module.ts
@@ -48,7 +48,7 @@ En un principio trabaje con una declaracion de los modulos con la logica de nego
 │ │ ├── vinculo.module.ts
 │ │ └── entities/
 │ │ └── vinculo.entity.ts
-
+```
 Pero busqué estandarizar en todo el código y declaraciones al inglés SIN modificar contratos en los DTOs ni endpoints entregados. La estrategia fue:
 
 1. **Mantener tablas/columnas en español** (SQL del PRD): `Sujeto`, `Objeto_De_Valor`, `Automotores`, `Vinculo_Sujeto_Objeto`
@@ -56,7 +56,7 @@ Pero busqué estandarizar en todo el código y declaraciones al inglés SIN modi
 3. **Separar responsabilidades**: DB naming vs Code naming mediante `@Entity('nombre_sql')`
 
 ### Estructura final (inglés para código, español para DB):
-
+```
 │ ├── modules/
 │ │ ├── subject/
 │ │ │ ├── subjects.module.ts
@@ -84,7 +84,7 @@ Pero busqué estandarizar en todo el código y declaraciones al inglés SIN modi
 │ │ ├── ownership.service.ts
 │ │ └── entities/
 │ │ └── ownership.entity.ts @Entity('Vinculo_Sujeto_Objeto')
-
+```
 ### Mapeo de nombres:
 
 | Tabla SQL (español)   | Folder (inglés) | Class (inglés) | Props DB                                      |
@@ -101,8 +101,9 @@ Pero busqué estandarizar en todo el código y declaraciones al inglés SIN modi
 - TypeORM conecta automáticamente: `class Subject` → tabla `Sujeto`
 - Los endpoints y DTOs mantienen sus nombres en español (contrato unchanged)
 
-Porque hice todo esto? porque en un principio trabajando con la guia de declaraciones sql tenia muchas declaraciones en espaniol y otras en ingles
-Con esto plantie en un comienzo una estructura que los modulos respeten la logica de negocio teniendo tablas en espaniol pero algunas keys dichas en ingles , adjunto es esquema sql planteado por el challenge entregado 
+Porque hice todo esto? 
+Porque en un principio trabajando con la guia de declaraciones sql basandome en el notion adjuntado, tenia muchas declaraciones en español y otras en ingles
+Con esto en un comienzo, di lugar a una estructura que los modulos respeten la logica de negocio teniendo tablas en español pero algunas keys, dichas en ingles , adjunto el esquema sql planteado por el challenge entregado por notion
 
 Esto fue lo planteado en el challenge 
 `https://wood-blanket-7b8.notion.site/Challenge-T-cnico-API-de-Registro-de-Automotores-361ca5b25e51803ca7baf11f47b087ca`
