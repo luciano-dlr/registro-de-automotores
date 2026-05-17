@@ -7,11 +7,11 @@ import { Ownership } from './entities/ownership.entity';
 export class OwnershipService {
   constructor(
     @InjectRepository(Ownership)
-    private vinculoRepository: Repository<Ownership>,
-  ) { }
+    private ownershipRepository: Repository<Ownership>,
+  ) {}
 
   async findByObjetoAndActivo(ovpId: number): Promise<Ownership | null> {
-    return await this.vinculoRepository
+    return await this.ownershipRepository
       .createQueryBuilder('v')
       .leftJoinAndSelect('v.sujeto', 'sujeto')
       .where('v.vso_ovp_id = :ovpId', { ovpId })
@@ -21,7 +21,7 @@ export class OwnershipService {
   }
 
   async findActivosByObjeto(ovpId: number): Promise<Ownership[]> {
-    return await this.vinculoRepository.find({
+    return await this.ownershipRepository.find({
       where: {
         vso_ovp_id: ovpId,
         vso_responsable: 'S',
@@ -30,19 +30,19 @@ export class OwnershipService {
     });
   }
 
-  async create(vinculoData: Partial<Ownership>): Promise<Ownership> {
-    const vinculo = this.vinculoRepository.create(vinculoData);
-    return await this.vinculoRepository.save(vinculo);
+  async create(OwnershipData: Partial<Ownership>): Promise<Ownership> {
+    const Ownership = this.ownershipRepository.create(OwnershipData);
+    return await this.ownershipRepository.save(Ownership);
   }
 
   async closeVinculo(vsoId: number, fechaFin: Date): Promise<void> {
-    await this.vinculoRepository.update(vsoId, {
+    await this.ownershipRepository.update(vsoId, {
       vso_fecha_fin: fechaFin,
     });
   }
 
   async findBySujetoAndActivo(spoId: number): Promise<Ownership[]> {
-    return await this.vinculoRepository.find({
+    return await this.ownershipRepository.find({
       where: {
         vso_spo_id: spoId,
         vso_responsable: 'S',

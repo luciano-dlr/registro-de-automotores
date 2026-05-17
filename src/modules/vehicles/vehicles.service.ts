@@ -40,81 +40,81 @@ export interface VehicleListItem {
 export class VehiclesService {
   constructor(
     @InjectRepository(Vehicle)
-    private automotorRepository: Repository<Vehicle>,
+    private vehicleRepository: Repository<Vehicle>,
     @InjectRepository(ObjectValue)
-    private objetoDeValorRepository: Repository<ObjectValue>,
+    private objectValueRepository: Repository<ObjectValue>,
     @InjectRepository(Subject)
-    private sujetoRepository: Repository<Subject>,
+    private subjectRepository: Repository<Subject>,
     @InjectRepository(Ownership)
-    private vinculoRepository: Repository<Ownership>,
+    private ownershipRepository: Repository<Ownership>,
   ) { }
 
   async findAll(): Promise<VehicleListItem[]> {
-    const automotoress = await this.automotorRepository.find({
+    const vehicles = await this.vehicleRepository.find({
       relations: ['objetoValor'],
     });
 
-    const resultado = await Promise.all(
-      automotoress.map(async (automotor) => {
-        const vinculoActivo = await this.vinculoRepository
+    const result = await Promise.all(
+      vehicles.map(async (vehicle) => {
+        const activeOwnership = await this.ownershipRepository
           .createQueryBuilder('v')
           .leftJoinAndSelect('v.sujeto', 'sujeto')
-          .where('v.vso_ovp_id = :ovpId', { ovpId: automotor.atr_ovp_id })
+          .where('v.vso_ovp_id = :ovpId', { ovpId: vehicle.atr_ovp_id })
           .andWhere('v.vso_responsable = :responsable', { responsable: 'S' })
           .andWhere('v.vso_fecha_fin IS NULL')
           .getOne();
 
         return {
-          dominio: automotor.atr_dominio,
-          numeroChasis: automotor.atr_numero_chasis,
-          numeroMotor: automotor.atr_numero_motor,
-          color: automotor.atr_color,
-          fechaFabricacion: automotor.atr_fecha_fabricacion,
-          fechaAltaRegistro: automotor.atr_fecha_alta_registro,
-          cuitDueno: vinculoActivo?.sujeto?.spo_cuit || null,
-          denominacionDueno: vinculoActivo?.sujeto?.spo_denominacion || null,
+          dominio: vehicle.atr_dominio,
+          numeroChasis: vehicle.atr_numero_chasis,
+          numeroMotor: vehicle.atr_numero_motor,
+          color: vehicle.atr_color,
+          fechaFabricacion: vehicle.atr_fecha_fabricacion,
+          fechaAltaRegistro: vehicle.atr_fecha_alta_registro,
+          cuitDueno: activeOwnership?.sujeto?.spo_cuit || null,
+          denominacionDueno: activeOwnership?.sujeto?.spo_denominacion || null,
         };
       }),
     );
 
-    return resultado;
+    return result;
   }
 
   async findByDominio(dominio: string): Promise<VehicleResponse> {
-    const automotor = await this.automotorRepository.findOne({
+    const vehicle = await this.vehicleRepository.findOne({
       where: { atr_dominio: dominio },
       relations: ['objetoValor'],
     });
 
-    if (!automotor) {
+    if (!vehicle) {
       throw new NotFoundException(
         `Automotor con dominio ${dominio} no encontrado`,
       );
     }
 
-    const vinculoActivo = await this.vinculoRepository
+    const activeOwnership = await this.ownershipRepository
       .createQueryBuilder('v')
       .leftJoinAndSelect('v.sujeto', 'sujeto')
-      .where('v.vso_ovp_id = :ovpId', { ovpId: automotor.atr_ovp_id })
+      .where('v.vso_ovp_id = :ovpId', { ovpId: vehicle.atr_ovp_id })
       .andWhere('v.vso_responsable = :responsable', { responsable: 'S' })
       .andWhere('v.vso_fecha_fin IS NULL')
       .getOne();
 
     return {
-      dominio: automotor.atr_dominio,
-      numeroChasis: automotor.atr_numero_chasis,
-      numeroMotor: automotor.atr_numero_motor,
-      color: automotor.atr_color,
-      fechaFabricacion: automotor.atr_fecha_fabricacion,
-      fechaAltaRegistro: automotor.atr_fecha_alta_registro,
-      numeroObjetoValor: automotor.atr_ovp_id,
-      cuitDueno: vinculoActivo?.sujeto?.spo_cuit || null,
-      denominacionDueno: vinculoActivo?.sujeto?.spo_denominacion || null,
+      dominio: vehicle.atr_dominio,
+      numeroChasis: vehicle.atr_numero_chasis,
+      numeroMotor: vehicle.atr_numero_motor,
+      color: vehicle.atr_color,
+      fechaFabricacion: vehicle.atr_fecha_fabricacion,
+      fechaAltaRegistro: vehicle.atr_fecha_alta_registro,
+      numeroObjetoValor: vehicle.atr_ovp_id,
+      cuitDueno: activeOwnership?.sujeto?.spo_cuit || null,
+      denominacionDueno: activeOwnership?.sujeto?.spo_denominacion || null,
     };
   }
 
   async create(
-    createAutomotorDto: CreateVehiclesDto,
+    CreateVehiclesDto: CreateVehiclesDto,
   ): Promise<VehicleResponse> {
     const {
       dominio,
@@ -123,9 +123,9 @@ export class VehiclesService {
       color,
       fechaFabricacion,
       cuitDueno,
-    } = createAutomotorDto;
+    } = CreateVehiclesDto;
 
-    const sujeto = await this.sujetoRepository.findOne({
+    const sujeto = await this.subjectRepository.findOne({
       where: { spo_cuit: cuitDueno },
     });
 
@@ -133,77 +133,77 @@ export class VehiclesService {
       throw new UnprocessableEntityException('CUIT no registrado');
     }
 
-    let objetoDeValor = await this.objetoDeValorRepository.findOne({
+    let objectValue = await this.objectValueRepository.findOne({
       where: { ovp_codigo: dominio },
     });
 
-    if (!objetoDeValor) {
-      objetoDeValor = this.objetoDeValorRepository.create({
+    if (!objectValue) {
+      objectValue = this.objectValueRepository.create({
         ovp_tipo: 'AUTOMOTOR',
         ovp_codigo: dominio,
       });
-      objetoDeValor = await this.objetoDeValorRepository.save(objetoDeValor);
+      objectValue = await this.objectValueRepository.save(objectValue);
     }
 
-    const automotor = this.automotorRepository.create({
-      atr_ovp_id: objetoDeValor.ovp_id,
+    const vehicle = this.vehicleRepository.create({
+      atr_ovp_id: objectValue.ovp_id,
       atr_dominio: dominio.toUpperCase(),
       atr_numero_chasis: numeroChasis?.toUpperCase(),
       atr_numero_motor: numeroMotor?.toUpperCase(),
       atr_color: color?.toUpperCase(),
       atr_fecha_fabricacion: fechaFabricacion,
     });
-    await this.automotorRepository.save(automotor);
+    await this.vehicleRepository.save(vehicle);
 
-    const vinculosPrevios = await this.vinculoRepository.find({
+    const previousOwnerships = await this.ownershipRepository.find({
       where: {
-        vso_ovp_id: objetoDeValor.ovp_id,
+        vso_ovp_id: objectValue.ovp_id,
         vso_responsable: 'S',
       },
     });
 
     const today = new Date();
-    for (const vinculo of vinculosPrevios) {
-      await this.vinculoRepository.update(vinculo.vso_id, {
+    for (const ownership of previousOwnerships) {
+      await this.ownershipRepository.update(ownership.vso_id, {
         vso_fecha_fin: today,
       });
     }
 
-    const nuevoVinculo = new Ownership();
-    nuevoVinculo.vso_ovp_id = objetoDeValor.ovp_id;
-    nuevoVinculo.vso_spo_id = Number(sujeto.spo_id);
-    nuevoVinculo.vso_tipo_vinculo = 'DUENO';
-    nuevoVinculo.vso_porcentaje = 100;
-    nuevoVinculo.vso_responsable = 'S';
-    nuevoVinculo.vso_fecha_inicio = today;
-    await this.vinculoRepository.save(nuevoVinculo);
+    const newOwnership = new Ownership();
+    newOwnership.vso_ovp_id = objectValue.ovp_id;
+    newOwnership.vso_spo_id = Number(sujeto.spo_id);
+    newOwnership.vso_tipo_vinculo = 'DUENO';
+    newOwnership.vso_porcentaje = 100;
+    newOwnership.vso_responsable = 'S';
+    newOwnership.vso_fecha_inicio = today;
+    await this.ownershipRepository.save(newOwnership);
 
-    const resultado = await this.findByDominio(dominio.toUpperCase());
+    const result = await this.findByDominio(dominio.toUpperCase());
 
     if (!numeroChasis || !numeroMotor || !color) {
-      resultado.nota = `Los campos numeroChasis, numeroMotor y color son opcionales. Puede actualizarlos con el dominio ${dominio.toUpperCase()}`;
+      result.nota = `Los campos numeroChasis, numeroMotor y color son opcionales. Puede actualizarlos con el dominio ${dominio.toUpperCase()}`;
     }
 
-    return resultado;
+    return result;
   }
 
   async update(
     dominio: string,
-    updateAutomotorDto: UpdateVehicleDto,
+    UpdateVehicleDto: UpdateVehicleDto,
   ): Promise<VehicleResponse> {
-    const automotor = await this.automotorRepository.findOne({
+    const vehicle = await this.vehicleRepository.findOne({
       where: { atr_dominio: dominio },
       relations: ['objetoValor'],
     });
 
-    if (!automotor) {
+    if (!vehicle) {
       throw new NotFoundException(
         `Automotor con dominio ${dominio} no encontrado`,
       );
     }
 
     const { numeroChasis, numeroMotor, color, fechaFabricacion, cuitDueno } =
-      updateAutomotorDto;
+      UpdateVehicleDto;
 
     const updateData: Partial<Vehicle> = {};
     if (numeroChasis !== undefined)
@@ -215,59 +215,59 @@ export class VehiclesService {
       updateData.atr_fecha_fabricacion = fechaFabricacion;
 
     if (Object.keys(updateData).length > 0) {
-      await this.automotorRepository.update(automotor.atr_id, updateData);
+      await this.vehicleRepository.update(vehicle.atr_id, updateData);
     }
 
     if (cuitDueno) {
-      const nuevoSujeto = await this.sujetoRepository.findOne({
+      const newSubject = await this.subjectRepository.findOne({
         where: { spo_cuit: cuitDueno },
       });
 
-      if (!nuevoSujeto) {
+      if (!newSubject) {
         throw new UnprocessableEntityException('CUIT no registrado');
       }
 
-      const vinculoActivo = await this.vinculoRepository
+      const activeOwnership = await this.ownershipRepository
         .createQueryBuilder('v')
-        .where('v.vso_ovp_id = :ovpId', { ovpId: automotor.atr_ovp_id })
+        .where('v.vso_ovp_id = :ovpId', { ovpId: vehicle.atr_ovp_id })
         .andWhere('v.vso_responsable = :responsable', { responsable: 'S' })
         .andWhere('v.vso_fecha_fin IS NULL')
         .getOne();
 
-      if (vinculoActivo) {
+      if (activeOwnership) {
         const today = new Date();
-        await this.vinculoRepository
+        await this.ownershipRepository
           .createQueryBuilder()
           .update(Ownership)
           .set({ vso_fecha_fin: today })
-          .where('vso_id = :id', { id: vinculoActivo.vso_id })
+          .where('vso_id = :id', { id: activeOwnership.vso_id })
           .execute();
       }
 
-      const nuevoVinculo = new Ownership();
-      nuevoVinculo.vso_ovp_id = Number(automotor.atr_ovp_id);
-      nuevoVinculo.vso_spo_id = Number(nuevoSujeto.spo_id);
-      nuevoVinculo.vso_tipo_vinculo = 'DUENO';
-      nuevoVinculo.vso_porcentaje = 100;
-      nuevoVinculo.vso_responsable = 'S';
-      nuevoVinculo.vso_fecha_inicio = new Date();
-      await this.vinculoRepository.save(nuevoVinculo);
+      const newOwnership = new Ownership();
+      newOwnership.vso_ovp_id = Number(vehicle.atr_ovp_id);
+      newOwnership.vso_spo_id = Number(newSubject.spo_id);
+      newOwnership.vso_tipo_vinculo = 'DUENO';
+      newOwnership.vso_porcentaje = 100;
+      newOwnership.vso_responsable = 'S';
+      newOwnership.vso_fecha_inicio = new Date();
+      await this.ownershipRepository.save(newOwnership);
     }
 
     return await this.findByDominio(dominio);
   }
 
   async delete(dominio: string): Promise<void> {
-    const automotor = await this.automotorRepository.findOne({
+    const vehicle = await this.vehicleRepository.findOne({
       where: { atr_dominio: dominio },
     });
 
-    if (!automotor) {
+    if (!vehicle) {
       throw new NotFoundException(
         `Automotor con dominio ${dominio} no encontrado`,
       );
     }
 
-    await this.automotorRepository.remove(automotor);
+    await this.vehicleRepository.remove(vehicle);
   }
 }
