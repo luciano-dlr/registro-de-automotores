@@ -8,39 +8,39 @@ import { CreateSubjectDto } from './dto/create-subject.dto';
 export class SubjectsService {
   constructor(
     @InjectRepository(Subject)
-    private sujetoRepository: Repository<Subject>,
+    private subjectRepository: Repository<Subject>,
   ) { }
 
-  async create(createSujetoDto: CreateSubjectDto): Promise<Subject> {
-    const sujeto = this.sujetoRepository.create(createSujetoDto);
-    return await this.sujetoRepository.save(sujeto);
+  async create(CreateSubjectDto: CreateSubjectDto): Promise<Subject> {
+    const subject = this.subjectRepository.create(CreateSubjectDto);
+    return await this.subjectRepository.save(subject);
   }
 
   async findAll(): Promise<Subject[]> {
-    return await this.sujetoRepository.find();
+    return await this.subjectRepository.find();
   }
 
   async findByCuit(cuit: string): Promise<Subject> {
-    const sujeto = await this.sujetoRepository.findOne({
+    const subject = await this.subjectRepository.findOne({
       where: { spo_cuit: cuit },
     });
 
-    if (!sujeto) {
+    if (!subject) {
       throw new NotFoundException(`Sujeto con CUIT ${cuit} no encontrado`);
     }
 
-    return sujeto;
+    return subject;
   }
 
   async findById(id: number): Promise<Subject> {
-    const sujeto = await this.sujetoRepository.findOne({
+    const subject = await this.subjectRepository.findOne({
       where: { spo_id: id },
     });
 
-    if (!sujeto) {
+    if (!subject) {
       throw new NotFoundException(`Sujeto con ID ${id} no encontrado`);
     }
 
-    return sujeto;
+    return subject;
   }
 }
