@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { IsDomain } from '../../../common/validators/domain.validator';
 import { IsCuit } from '../../../common/validators/cuit.validator';
-import { IsManufacturingDate } from '../../../common/validators/fecha-fabricacion.validator';
+import { IsManufacturingDate } from '../../../common/validators/date-manufacturing.validator';
 
 export class CreateVehiclesDto {
   @IsDomain()

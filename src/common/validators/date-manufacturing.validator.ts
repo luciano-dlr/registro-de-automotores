@@ -24,7 +24,6 @@ export function IsManufacturingDate(validationOptions?: ValidationOptions) {
   };
 }
 
-
 export function validateManufacturingDate(fecha: number | string): {
   valido: boolean;
   mensaje?: string;
@@ -59,21 +58,15 @@ export function validateManufacturingDate(fecha: number | string): {
   const anioActual = ahora.getFullYear();
   const mesActual = ahora.getMonth() + 1;
 
-
-  if (anio > anioActual + 1) {
+  // El año no puede ser mayor al actual
+  if (anio > anioActual) {
     return {
       valido: false,
       mensaje: 'La fecha de fabricación no puede ser futura',
     };
   }
 
-  if (anio === anioActual + 1 && mes > mesActual) {
-    return {
-      valido: false,
-      mensaje: 'La fecha de fabricación no puede ser futura',
-    };
-  }
-
+  // Si el año es el actual, el mes no puede ser mayor al mes actual
   if (anio === anioActual && mes > mesActual) {
     return {
       valido: false,
@@ -83,7 +76,6 @@ export function validateManufacturingDate(fecha: number | string): {
 
   return { valido: true };
 }
-
 
 export function isManufacturingDateValid(fecha: number | string): boolean {
   const resultado = validateManufacturingDate(fecha);

@@ -22,3 +22,11 @@ export function IsDomain(validationOptions?: ValidationOptions) {
     });
   };
 }
+
+export function validateDomain(d: string): boolean {
+  if (!d || typeof d !== 'string') {
+    return false;
+  }
+  const domainRegex = /^[A-Z]{3}[0-9]{3}$|^[A-Z]{2}[0-9]{3}[A-Z]{2}$/;
+  return domainRegex.test(d.toUpperCase());
+}

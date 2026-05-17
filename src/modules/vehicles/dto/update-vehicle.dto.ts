@@ -6,7 +6,7 @@ import {
   Min,
 } from 'class-validator';
 import { IsCuit } from '../../../common/validators/cuit.validator';
-import { IsManufacturingDate } from '../../../common/validators/fecha-fabricacion.validator';
+import { IsManufacturingDate } from '../../../common/validators/date-manufacturing.validator';
 
 export class UpdateVehicleDto {
   @IsOptional()
