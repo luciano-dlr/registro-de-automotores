@@ -26,8 +26,7 @@ describe('CuitValidator', () => {
 
     describe('CUITs inválidos', () => {
       it('debe rechazar CUIT con dígito verificador incorrecto', () => {
-        // Cambiamos el último dígito de uno válido
-        expect(validarCuit('27123456781')).toBe(false); // último dígito incorrecto
+        expect(validarCuit('27123456781')).toBe(false);
       });
 
       it('debe rechazar CUIT con 10 dígitos (falta uno)', () => {
@@ -59,14 +58,13 @@ describe('CuitValidator', () => {
       });
 
       it('debe rechazar CUIT con primer dígito inválido (no 20, 23, 24, 27, 30, 34)', () => {
-        expect(validarCuit('10345678905')).toBe(false); // 10 no es válido
-        expect(validarCuit('50345678905')).toBe(false); // 50 no es válido
+        expect(validarCuit('10345678905')).toBe(false);
+        expect(validarCuit('50345678905')).toBe(false);
       });
     });
 
     describe('Casos edge', () => {
       it('debe aceptar CUIT con leading zeros en base', () => {
-        // CUIT válido de persona con 00 al inicio
         expect(validarCuit('20000000001')).toBe(true);
       });
 

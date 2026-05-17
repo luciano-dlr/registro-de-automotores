@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { INestApplication, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -31,7 +31,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
   ],
 })
 export class AppModule {
-  static setupSwagger(app: any) {
+  static setupSwagger(app: INestApplication) {
     const config = new DocumentBuilder()
       .setTitle('API de Registro de Automotores')
       .setDescription(

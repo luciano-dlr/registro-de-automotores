@@ -12,6 +12,30 @@ import { Vinculo } from '../vinculo/entities/vinculo.entity';
 import { CreateAutomotorDto } from './dto/create-automotor.dto';
 import { UpdateAutomotorDto } from './dto/update-automotor.dto';
 
+export interface AutomotorResponse {
+  dominio: string;
+  numeroChasis: string | null;
+  numeroMotor: string | null;
+  color: string | null;
+  fechaFabricacion: number;
+  fechaAltaRegistro: Date;
+  numeroObjetoValor: number;
+  cuitDueno: string | null;
+  denominacionDueno: string | null;
+  nota?: string;
+}
+
+export interface AutomotorListItem {
+  dominio: string;
+  numeroChasis: string | null;
+  numeroMotor: string | null;
+  color: string | null;
+  fechaFabricacion: number;
+  fechaAltaRegistro: Date;
+  cuitDueno: string | null;
+  denominacionDueno: string | null;
+}
+
 @Injectable()
 export class AutomotoresService {
   constructor(
@@ -23,14 +47,13 @@ export class AutomotoresService {
     private sujetoRepository: Repository<Sujeto>,
     @InjectRepository(Vinculo)
     private vinculoRepository: Repository<Vinculo>,
-  ) {}
+  ) { }
 
-  async findAll(): Promise<any[]> {
+  async findAll(): Promise<AutomotorListItem[]> {
     const automotoress = await this.automotorRepository.find({
       relations: ['objetoValor'],
     });
 
-    // Para cada automotor, buscar el vínculo activo
     const resultado = await Promise.all(
       automotoress.map(async (automotor) => {
         const vinculoActivo = await this.vinculoRepository
@@ -57,7 +80,7 @@ export class AutomotoresService {
     return resultado;
   }
 
-  async findByDominio(dominio: string): Promise<any> {
+  async findByDominio(dominio: string): Promise<AutomotorResponse> {
     const automotor = await this.automotorRepository.findOne({
       where: { atr_dominio: dominio },
       relations: ['objetoValor'],
@@ -90,7 +113,9 @@ export class AutomotoresService {
     };
   }
 
-  async create(createAutomotorDto: CreateAutomotorDto): Promise<any> {
+  async create(
+    createAutomotorDto: CreateAutomotorDto,
+  ): Promise<AutomotorResponse> {
     const {
       dominio,
       numeroChasis,
@@ -100,7 +125,6 @@ export class AutomotoresService {
       cuitDueno,
     } = createAutomotorDto;
 
-    // Validar que el CUIT del dueño exista
     const sujeto = await this.sujetoRepository.findOne({
       where: { spo_cuit: cuitDueno },
     });
@@ -109,13 +133,11 @@ export class AutomotoresService {
       throw new UnprocessableEntityException('CUIT no registrado');
     }
 
-    // Buscar o crear Objeto_De_Valor con ese dominio
     let objetoDeValor = await this.objetoDeValorRepository.findOne({
       where: { ovp_codigo: dominio },
     });
 
     if (!objetoDeValor) {
-      // Crear nuevo Objeto_De_Valor
       objetoDeValor = this.objetoDeValorRepository.create({
         ovp_tipo: 'AUTOMOTOR',
         ovp_codigo: dominio,
@@ -123,7 +145,6 @@ export class AutomotoresService {
       objetoDeValor = await this.objetoDeValorRepository.save(objetoDeValor);
     }
 
-    // Crear el Automotor
     const automotor = this.automotorRepository.create({
       atr_ovp_id: objetoDeValor.ovp_id,
       atr_dominio: dominio.toUpperCase(),
@@ -134,7 +155,6 @@ export class AutomotoresService {
     });
     await this.automotorRepository.save(automotor);
 
-    // Cerrar cualquier vínculo activo previo para este objeto
     const vinculosPrevios = await this.vinculoRepository.find({
       where: {
         vso_ovp_id: objetoDeValor.ovp_id,
@@ -149,7 +169,6 @@ export class AutomotoresService {
       });
     }
 
-    // Crear nuevo vínculo con el dueño
     const nuevoVinculo = new Vinculo();
     nuevoVinculo.vso_ovp_id = objetoDeValor.ovp_id;
     nuevoVinculo.vso_spo_id = Number(sujeto.spo_id);
@@ -157,16 +176,21 @@ export class AutomotoresService {
     nuevoVinculo.vso_porcentaje = 100;
     nuevoVinculo.vso_responsable = 'S';
     nuevoVinculo.vso_fecha_inicio = today;
-    nuevoVinculo.vso_fecha_fin = undefined as any;
     await this.vinculoRepository.save(nuevoVinculo);
 
-    return await this.findByDominio(dominio.toUpperCase());
+    const resultado = await this.findByDominio(dominio.toUpperCase());
+
+    if (!numeroChasis || !numeroMotor || !color) {
+      resultado.nota = `Los campos numeroChasis, numeroMotor y color son opcionales. Puede actualizarlos con el dominio ${dominio.toUpperCase()}`;
+    }
+
+    return resultado;
   }
 
   async update(
     dominio: string,
     updateAutomotorDto: UpdateAutomotorDto,
-  ): Promise<any> {
+  ): Promise<AutomotorResponse> {
     const automotor = await this.automotorRepository.findOne({
       where: { atr_dominio: dominio },
       relations: ['objetoValor'],
@@ -181,7 +205,6 @@ export class AutomotoresService {
     const { numeroChasis, numeroMotor, color, fechaFabricacion, cuitDueno } =
       updateAutomotorDto;
 
-    // Actualizar datos del automotor solo si hay campos para actualizar
     const updateData: Partial<Automotor> = {};
     if (numeroChasis !== undefined)
       updateData.atr_numero_chasis = numeroChasis.toUpperCase();
@@ -191,12 +214,10 @@ export class AutomotoresService {
     if (fechaFabricacion !== undefined)
       updateData.atr_fecha_fabricacion = fechaFabricacion;
 
-    // Solo ejecutar update si hay datos para actualizar
     if (Object.keys(updateData).length > 0) {
       await this.automotorRepository.update(automotor.atr_id, updateData);
     }
 
-    // Si se envía un nuevo CUIT, reasignar dueño
     if (cuitDueno) {
       const nuevoSujeto = await this.sujetoRepository.findOne({
         where: { spo_cuit: cuitDueno },
@@ -206,7 +227,6 @@ export class AutomotoresService {
         throw new UnprocessableEntityException('CUIT no registrado');
       }
 
-      // Cerrar vínculo activo actual - usar query builder para manejar NULL correctamente
       const vinculoActivo = await this.vinculoRepository
         .createQueryBuilder('v')
         .where('v.vso_ovp_id = :ovpId', { ovpId: automotor.atr_ovp_id })
@@ -216,7 +236,6 @@ export class AutomotoresService {
 
       if (vinculoActivo) {
         const today = new Date();
-        // Usar query builder para update
         await this.vinculoRepository
           .createQueryBuilder()
           .update(Vinculo)
@@ -225,7 +244,6 @@ export class AutomotoresService {
           .execute();
       }
 
-      // Crear nuevo vínculo
       const nuevoVinculo = new Vinculo();
       nuevoVinculo.vso_ovp_id = Number(automotor.atr_ovp_id);
       nuevoVinculo.vso_spo_id = Number(nuevoSujeto.spo_id);
@@ -233,7 +251,6 @@ export class AutomotoresService {
       nuevoVinculo.vso_porcentaje = 100;
       nuevoVinculo.vso_responsable = 'S';
       nuevoVinculo.vso_fecha_inicio = new Date();
-      nuevoVinculo.vso_fecha_fin = undefined as any;
       await this.vinculoRepository.save(nuevoVinculo);
     }
 
@@ -251,7 +268,6 @@ export class AutomotoresService {
       );
     }
 
-    // Eliminar automotor (cascadeará a Objeto_De_Valor y Vinculos)
     await this.automotorRepository.remove(automotor);
   }
 }

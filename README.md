@@ -120,7 +120,7 @@ curl http://localhost:3000/api/automotores
 
 Errores de validación retornan `422 Unprocessable Entity`.
 
-## 🏗️ Arquitectura
+##  Arquitectura
 
 ```
 src/
@@ -161,4 +161,3 @@ docker compose down
 # Eliminar volúmenes (resetear DB)
 docker compose down -v
 ```
-

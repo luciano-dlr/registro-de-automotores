@@ -19,7 +19,7 @@ export class ObjetoDeValor {
   ovp_tipo: string;
 
   @Column({ type: 'varchar', length: 64, unique: true, nullable: false })
-  ovp_codigo: string; // será el dominio
+  ovp_codigo: string;
 
   @Column({ type: 'varchar', length: 240, nullable: true })
   ovp_descripcion: string;

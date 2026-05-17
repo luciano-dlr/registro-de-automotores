@@ -36,7 +36,10 @@ export class CreateAutomotorDto {
   @MaxLength(40, { message: 'El color no puede exceder 40 caracteres' })
   color?: string;
 
-  @IsFechaFabricacion()
+  @IsFechaFabricacion({
+    message:
+      'La fecha de fabricación debe tener formato YYYYMM (6 dígitos), mes entre 01 y 12, y no puede ser futura',
+  })
   @IsNumber({}, { message: 'La fecha de fabricación debe ser un número' })
   @Min(190001, { message: 'La fecha de fabricación debe ser mayor a 190000' })
   fechaFabricacion: number;

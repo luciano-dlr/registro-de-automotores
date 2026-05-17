@@ -6,11 +6,11 @@ import { Vinculo } from '../modules/vinculo/entities/vinculo.entity';
 
 const dataSource = new DataSource({
   type: 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432', 10),
-  username: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
-  database: process.env.DB_NAME || 'automotores_db',
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT as string, 10),
+  username: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   synchronize: false,
   entities: [Sujeto, ObjetoDeValor, Automotor, Vinculo],
 });
@@ -65,7 +65,6 @@ async function seed() {
   const automotorRepo = dataSource.getRepository(Automotor);
   const vinculoRepo = dataSource.getRepository(Vinculo);
 
-  // Verificar si ya hay datos
   const countSujetos = await sujetoRepo.count();
   if (countSujetos > 0) {
     console.log(
@@ -75,22 +74,18 @@ async function seed() {
     return;
   }
 
-  // Insertar sujetos
   console.log('Insertando sujetos...');
   const sujetos = await sujetoRepo.save(sujetosData);
   console.log(`${sujetos.length} sujetos insertados`);
 
-  // Insertar automotriz y vínculos
   console.log('Insertando automotores...');
   for (const auto of automovilesData) {
-    // Crear ObjetoDeValor
     const objeto = await objetoRepo.save({
       ovp_tipo: 'AUTOMOTOR',
       ovp_codigo: auto.dominio,
       ovp_descripcion: `Automotor ${auto.dominio}`,
     });
 
-    // Crear Automotor
     await automotorRepo.save({
       atr_ovp_id: objeto.ovp_id,
       atr_dominio: auto.dominio,
@@ -100,7 +95,6 @@ async function seed() {
       atr_fecha_fabricacion: auto.fechaFabricacion,
     });
 
-    // Asignar un sujeto random como dueño
     const sujetoRandom = sujetos[Math.floor(Math.random() * sujetos.length)];
     await vinculoRepo.save({
       vso_ovp_id: objeto.ovp_id,

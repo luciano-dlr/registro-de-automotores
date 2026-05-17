@@ -5,7 +5,6 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Habilitar validación global
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -14,7 +13,6 @@ async function bootstrap() {
     }),
   );
 
-  // Configurar Swagger
   AppModule.setupSwagger(app);
 
   await app.listen(process.env.PORT ?? 3000);

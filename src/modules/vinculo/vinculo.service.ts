@@ -11,14 +11,13 @@ export class VinculoService {
   ) {}
 
   async findByObjetoAndActivo(ovpId: number): Promise<Vinculo | null> {
-    return await this.vinculoRepository.findOne({
-      where: {
-        vso_ovp_id: ovpId,
-        vso_responsable: 'S',
-        vso_fecha_fin: undefined as any, // No se puede usar null directamente en TypeORM
-      },
-      relations: ['sujeto'],
-    });
+    return await this.vinculoRepository
+      .createQueryBuilder('v')
+      .leftJoinAndSelect('v.sujeto', 'sujeto')
+      .where('v.vso_ovp_id = :ovpId', { ovpId })
+      .andWhere('v.vso_responsable = :responsable', { responsable: 'S' })
+      .andWhere('v.vso_fecha_fin IS NULL')
+      .getOne();
   }
 
   async findActivosByObjeto(ovpId: number): Promise<Vinculo[]> {

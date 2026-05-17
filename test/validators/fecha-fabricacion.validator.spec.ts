@@ -19,7 +19,7 @@ describe('FechaFabricacionValidator', () => {
 
       it('debe aceptar fecha de año actual', () => {
         const anioActual = new Date().getFullYear();
-        const fechaActual = anioActual * 100 + 1; // Enero del año actual
+        const fechaActual = anioActual * 100 + 1;
         const resultado = validarFechaFabricacion(fechaActual);
         expect(resultado.valido).toBe(true);
       });
@@ -29,7 +29,7 @@ describe('FechaFabricacionValidator', () => {
         const mesActual = new Date().getMonth() + 1;
         const fechaProxima = anioProximo * 100 + mesActual;
 
-        // Solo debería ser válido si el mes no es mayor al actual
+
         if (mesActual <= 12) {
           const resultado = validarFechaFabricacion(fechaProxima);
           expect(resultado.valido).toBe(true);
@@ -87,7 +87,7 @@ describe('FechaFabricacionValidator', () => {
 
       it('debe rechazar año próximo con mes futuro', () => {
         const anioProximo = new Date().getFullYear() + 1;
-        const mesFuturo = new Date().getMonth() + 1 + 3; // 3 meses en el futuro
+        const mesFuturo = new Date().getMonth() + 1 + 3;
         if (mesFuturo <= 12) {
           const resultado = validarFechaFabricacion(
             anioProximo * 100 + mesFuturo,

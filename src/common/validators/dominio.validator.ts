@@ -1,14 +1,8 @@
 import {
   registerDecorator,
   ValidationOptions,
-  ValidationArguments,
 } from 'class-validator';
 
-/**
- * Validador de Dominio de Automotor
- * Formato válido: AAA999 (ej: ABC123) o AA999AA (ej: AB123CD)
- * Regex: ^[A-Z]{3}[0-9]{3}$|^[A-Z]{2}[0-9]{3}[A-Z]{2}$
- */
 export function IsDominio(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
@@ -32,9 +26,6 @@ export function IsDominio(validationOptions?: ValidationOptions) {
   };
 }
 
-/**
- * Función utilitaria para validar dominio (sin decorador)
- */
 export function validarDominio(dominio: string): boolean {
   if (!dominio || typeof dominio !== 'string') {
     return false;

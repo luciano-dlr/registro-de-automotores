@@ -28,7 +28,7 @@ export class Automotor {
   atr_color: string;
 
   @Column({ type: 'int', nullable: false })
-  atr_fecha_fabricacion: number; // YYYYMM
+  atr_fecha_fabricacion: number;
 
   @Column({ type: 'timestamptz', default: () => 'NOW()' })
   atr_fecha_alta_registro: Date;
