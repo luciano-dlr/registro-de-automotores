@@ -5,9 +5,9 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
-import { SujetosModule } from './modules/sujetos/sujetos.module';
-import { AutomotoresModule } from './modules/automotores/automotores.module';
-import { VinculoModule } from './modules/vinculo/vinculo.module';
+import { SubjectsModule } from './modules/subject/subjects.module';
+import { VehiclesModule } from './modules/vehicles/vehicles.module';
+import { OwnershipModule } from './modules/ownership/ownership.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 @Module({
@@ -17,9 +17,9 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
       envFilePath: '.env',
     }),
     DatabaseModule,
-    SujetosModule,
-    AutomotoresModule,
-    VinculoModule,
+    SubjectsModule,
+    VehiclesModule,
+    OwnershipModule,
   ],
   controllers: [AppController],
   providers: [

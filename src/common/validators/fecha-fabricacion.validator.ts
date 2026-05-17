@@ -1,9 +1,9 @@
 import { registerDecorator, ValidationOptions } from 'class-validator';
 
-export function IsFechaFabricacion(validationOptions?: ValidationOptions) {
+export function IsManufacturingDate(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
-      name: 'isFechaFabricacion',
+      name: 'isManufacturingDate',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
@@ -13,11 +13,11 @@ export function IsFechaFabricacion(validationOptions?: ValidationOptions) {
             if (typeof value === 'string') {
               const numValue = parseInt(value, 10);
               if (isNaN(numValue)) return false;
-              return isFechaFabricacionValida(numValue);
+              return isManufacturingDateValid(numValue);
             }
             return false;
           }
-          return isFechaFabricacionValida(value);
+          return isManufacturingDateValid(value);
         },
       },
     });
@@ -25,7 +25,7 @@ export function IsFechaFabricacion(validationOptions?: ValidationOptions) {
 }
 
 
-export function validarFechaFabricacion(fecha: number | string): {
+export function validateManufacturingDate(fecha: number | string): {
   valido: boolean;
   mensaje?: string;
 } {
@@ -85,7 +85,7 @@ export function validarFechaFabricacion(fecha: number | string): {
 }
 
 
-export function isFechaFabricacionValida(fecha: number | string): boolean {
-  const resultado = validarFechaFabricacion(fecha);
+export function isManufacturingDateValid(fecha: number | string): boolean {
+  const resultado = validateManufacturingDate(fecha);
   return resultado.valido;
 }

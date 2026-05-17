@@ -5,14 +5,14 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Automotor } from './entities/automotor.entity';
-import { ObjetoDeValor } from '../objeto-valor/entities/objeto-valor.entity';
-import { Sujeto } from '../sujetos/entities/sujeto.entity';
-import { Vinculo } from '../vinculo/entities/vinculo.entity';
-import { CreateAutomotorDto } from './dto/create-automotor.dto';
-import { UpdateAutomotorDto } from './dto/update-automotor.dto';
+import { Vehicle } from './entities/vehicle.entity';
+import { ObjectValue } from '../object-value/entities/object-value.entity';
+import { Subject } from '../subject/entities/subject.entity';
+import { Ownership } from '../ownership/entities/ownership.entity';
+import { CreateVehiclesDto } from './dto/create-vehicle.dto';
+import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 
-export interface AutomotorResponse {
+export interface VehicleResponse {
   dominio: string;
   numeroChasis: string | null;
   numeroMotor: string | null;
@@ -25,7 +25,7 @@ export interface AutomotorResponse {
   nota?: string;
 }
 
-export interface AutomotorListItem {
+export interface VehicleListItem {
   dominio: string;
   numeroChasis: string | null;
   numeroMotor: string | null;
@@ -37,19 +37,19 @@ export interface AutomotorListItem {
 }
 
 @Injectable()
-export class AutomotoresService {
+export class VehiclesService {
   constructor(
-    @InjectRepository(Automotor)
-    private automotorRepository: Repository<Automotor>,
-    @InjectRepository(ObjetoDeValor)
-    private objetoDeValorRepository: Repository<ObjetoDeValor>,
-    @InjectRepository(Sujeto)
-    private sujetoRepository: Repository<Sujeto>,
-    @InjectRepository(Vinculo)
-    private vinculoRepository: Repository<Vinculo>,
+    @InjectRepository(Vehicle)
+    private automotorRepository: Repository<Vehicle>,
+    @InjectRepository(ObjectValue)
+    private objetoDeValorRepository: Repository<ObjectValue>,
+    @InjectRepository(Subject)
+    private sujetoRepository: Repository<Subject>,
+    @InjectRepository(Ownership)
+    private vinculoRepository: Repository<Ownership>,
   ) { }
 
-  async findAll(): Promise<AutomotorListItem[]> {
+  async findAll(): Promise<VehicleListItem[]> {
     const automotoress = await this.automotorRepository.find({
       relations: ['objetoValor'],
     });
@@ -80,7 +80,7 @@ export class AutomotoresService {
     return resultado;
   }
 
-  async findByDominio(dominio: string): Promise<AutomotorResponse> {
+  async findByDominio(dominio: string): Promise<VehicleResponse> {
     const automotor = await this.automotorRepository.findOne({
       where: { atr_dominio: dominio },
       relations: ['objetoValor'],
@@ -114,8 +114,8 @@ export class AutomotoresService {
   }
 
   async create(
-    createAutomotorDto: CreateAutomotorDto,
-  ): Promise<AutomotorResponse> {
+    createAutomotorDto: CreateVehiclesDto,
+  ): Promise<VehicleResponse> {
     const {
       dominio,
       numeroChasis,
@@ -169,7 +169,7 @@ export class AutomotoresService {
       });
     }
 
-    const nuevoVinculo = new Vinculo();
+    const nuevoVinculo = new Ownership();
     nuevoVinculo.vso_ovp_id = objetoDeValor.ovp_id;
     nuevoVinculo.vso_spo_id = Number(sujeto.spo_id);
     nuevoVinculo.vso_tipo_vinculo = 'DUENO';
@@ -189,8 +189,8 @@ export class AutomotoresService {
 
   async update(
     dominio: string,
-    updateAutomotorDto: UpdateAutomotorDto,
-  ): Promise<AutomotorResponse> {
+    updateAutomotorDto: UpdateVehicleDto,
+  ): Promise<VehicleResponse> {
     const automotor = await this.automotorRepository.findOne({
       where: { atr_dominio: dominio },
       relations: ['objetoValor'],
@@ -205,7 +205,7 @@ export class AutomotoresService {
     const { numeroChasis, numeroMotor, color, fechaFabricacion, cuitDueno } =
       updateAutomotorDto;
 
-    const updateData: Partial<Automotor> = {};
+    const updateData: Partial<Vehicle> = {};
     if (numeroChasis !== undefined)
       updateData.atr_numero_chasis = numeroChasis.toUpperCase();
     if (numeroMotor !== undefined)
@@ -238,13 +238,13 @@ export class AutomotoresService {
         const today = new Date();
         await this.vinculoRepository
           .createQueryBuilder()
-          .update(Vinculo)
+          .update(Ownership)
           .set({ vso_fecha_fin: today })
           .where('vso_id = :id', { id: vinculoActivo.vso_id })
           .execute();
       }
 
-      const nuevoVinculo = new Vinculo();
+      const nuevoVinculo = new Ownership();
       nuevoVinculo.vso_ovp_id = Number(automotor.atr_ovp_id);
       nuevoVinculo.vso_spo_id = Number(nuevoSujeto.spo_id);
       nuevoVinculo.vso_tipo_vinculo = 'DUENO';

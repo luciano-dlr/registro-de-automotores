@@ -8,21 +8,21 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
-import { SujetosService } from './sujetos.service';
-import { CreateSujetoDto } from './dto/create-sujeto.dto';
+import { SubjectsService } from './subjects.service';
+import { CreateSubjectDto } from './dto/create-subject.dto';
 import { QueryCuitDto } from './dto/query-cuit.dto';
 
 @ApiTags('sujetos')
 @Controller('api/sujetos')
-export class SujetosController {
-  constructor(private readonly sujetosService: SujetosService) {}
+export class SubjectsController {
+  constructor(private readonly sujetosService: SubjectsService) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear un nuevo sujeto (dueño)' })
   @ApiResponse({ status: 201, description: 'Sujeto creado exitosamente' })
   @ApiResponse({ status: 422, description: 'Error de validación' })
-  async create(@Body() createSujetoDto: CreateSujetoDto) {
+  async create(@Body() createSujetoDto: CreateSubjectDto) {
     return await this.sujetosService.create(createSujetoDto);
   }
 

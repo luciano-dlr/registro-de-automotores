@@ -10,14 +10,14 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { AutomotoresService } from './automotores.service';
-import { CreateAutomotorDto } from './dto/create-automotor.dto';
-import { UpdateAutomotorDto } from './dto/update-automotor.dto';
+import { VehiclesService } from './vehicles.service';
+import { CreateVehiclesDto } from './dto/create-vehicle.dto';
+import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 
 @ApiTags('automotores')
 @Controller('api/automotores')
-export class AutomotoresController {
-  constructor(private readonly automotoresService: AutomotoresService) {}
+export class vehiclesController {
+  constructor(private readonly automotoresService: VehiclesService) { }
 
   @Get()
   @ApiOperation({ summary: 'Listar todos los automotores con su dueño actual' })
@@ -47,7 +47,7 @@ export class AutomotoresController {
     status: 422,
     description: 'Error de validación o CUIT no registrado',
   })
-  async create(@Body() createAutomotorDto: CreateAutomotorDto) {
+  async create(@Body() createAutomotorDto: CreateVehiclesDto) {
     return await this.automotoresService.create(createAutomotorDto);
   }
 
@@ -64,7 +64,7 @@ export class AutomotoresController {
   @ApiResponse({ status: 404, description: 'Automotor no encontrado' })
   async update(
     @Param('dominio') dominio: string,
-    @Body() updateAutomotorDto: UpdateAutomotorDto,
+    @Body() updateAutomotorDto: UpdateVehicleDto,
   ) {
     return await this.automotoresService.update(
       dominio.toUpperCase(),

@@ -123,23 +123,33 @@ Errores de validación retornan `422 Unprocessable Entity`.
 ##  Arquitectura
 
 ```
-src/
-├── main.ts                    # Entry point
-├── app.module.ts              # Módulo principal
-├── database/                  # Configuración de base de datos
-│   ├── database.module.ts
-│   └── database.providers.ts
-├── common/
-│   ├── validators/            # Validadores personalizados
-│   │   ├── dominio.validator.ts
-│   │   ├── cuit.validator.ts
-│   │   └── fecha-fabricacion.validator.ts
-│   └── filters/               # Filtros de excepciones
-│       └── http-exception.filter.ts
-└── modules/
-    ├── sujetos/               # Módulo de sujetos (dueños)
-    ├── automotores/           # Módulo de automotores
-    └── vinculo/               # Módulo de vínculos
+│ ├── modules/
+│ │ ├── subject/
+│ │ │ ├── subjects.module.ts
+│ │ │ ├── subjects.controller.ts
+│ │ │ │ ├── subjects.service.ts
+│ │ │ ├── dto/
+│ │ │ │ ├── create-subject.dto.ts
+│ │ │ │ └── query-cuit.dto.ts
+│ │ │ └── entities/
+│ │ │ └── subject.entity.ts @Entity('Sujeto')
+│ │ ├── object-value/
+│ │ │ └── entities/
+│ │ │ └── object-value.entity.ts @Entity('Objeto_De_Valor')
+│ │ ├── vehicles/
+│ │ │ ├── vehicles.module.ts
+│ │ │ ├── vehicles.controller.ts
+│ │ │ ├── vehicles.service.ts
+│ │ │ ├── dto/
+│ │ │ │ ├── create-vehicle.dto.ts
+│ │ │ │ └── update-vehicle.dto.ts
+│ │ │ └── entities/
+│ │ │ └── vehicle.entity.ts @Entity('Automotores')
+│ │ └── ownership/
+│ │ ├── ownership.module.ts
+│ │ ├── ownership.service.ts
+│ │ └── entities/
+│ │ └── ownership.entity.ts @Entity('Vinculo_Sujeto_Objeto')
 ```
 
 ##  Decisiones de diseño

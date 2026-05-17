@@ -7,11 +7,11 @@ import {
   OneToOne,
   OneToMany,
 } from 'typeorm';
-import { Automotor } from '../../automotores/entities/automotor.entity';
-import { Vinculo } from '../../vinculo/entities/vinculo.entity';
+import { Vehicle } from '../../vehicles/entities/vehicle.entity';
+import { Ownership } from '../../ownership/entities/ownership.entity';
 
 @Entity('Objeto_De_Valor')
-export class ObjetoDeValor {
+export class ObjectValue {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   ovp_id: number;
 
@@ -30,11 +30,11 @@ export class ObjetoDeValor {
   @UpdateDateColumn({ type: 'timestamptz', default: () => 'NOW()' })
   updated_at: Date;
 
-  @OneToOne(() => Automotor, (automotor) => automotor.objetoValor, {
+  @OneToOne(() => Vehicle, (Vehicle) => Vehicle.objetoValor, {
     cascade: true,
   })
-  automotor: Automotor;
+  automotor: Vehicle;
 
-  @OneToMany(() => Vinculo, (vinculo) => vinculo.objetoValor)
-  vinculos: Vinculo[];
+  @OneToMany(() => Ownership, (Ownership) => Ownership.objetoValor)
+  vinculos: Ownership[];
 }

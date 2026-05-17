@@ -1,4 +1,4 @@
-import { validarDominio } from '../../src/common/validators/dominio.validator';
+import { validarDominio } from '../../src/common/validators/domain.validator';
 
 describe('DominioValidator', () => {
   describe('validarDominio', () => {

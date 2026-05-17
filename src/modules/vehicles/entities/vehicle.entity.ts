@@ -5,10 +5,10 @@ import {
   JoinColumn,
   OneToOne,
 } from 'typeorm';
-import { ObjetoDeValor } from '../../objeto-valor/entities/objeto-valor.entity';
+import { ObjectValue } from '../../object-value/entities/object-value.entity';
 
 @Entity('Automotores')
-export class Automotor {
+export class Vehicle {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   atr_id: number;
 
@@ -33,7 +33,7 @@ export class Automotor {
   @Column({ type: 'timestamptz', default: () => 'NOW()' })
   atr_fecha_alta_registro: Date;
 
-  @OneToOne(() => ObjetoDeValor)
+  @OneToOne(() => ObjectValue)
   @JoinColumn({ name: 'atr_ovp_id' })
-  objetoValor: ObjetoDeValor;
+  objetoValor: ObjectValue;
 }

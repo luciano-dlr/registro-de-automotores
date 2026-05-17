@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Vinculo } from './entities/vinculo.entity';
+import { Ownership } from './entities/ownership.entity';
 
 @Injectable()
-export class VinculoService {
+export class OwnershipService {
   constructor(
-    @InjectRepository(Vinculo)
-    private vinculoRepository: Repository<Vinculo>,
-  ) {}
+    @InjectRepository(Ownership)
+    private vinculoRepository: Repository<Ownership>,
+  ) { }
 
-  async findByObjetoAndActivo(ovpId: number): Promise<Vinculo | null> {
+  async findByObjetoAndActivo(ovpId: number): Promise<Ownership | null> {
     return await this.vinculoRepository
       .createQueryBuilder('v')
       .leftJoinAndSelect('v.sujeto', 'sujeto')
@@ -20,7 +20,7 @@ export class VinculoService {
       .getOne();
   }
 
-  async findActivosByObjeto(ovpId: number): Promise<Vinculo[]> {
+  async findActivosByObjeto(ovpId: number): Promise<Ownership[]> {
     return await this.vinculoRepository.find({
       where: {
         vso_ovp_id: ovpId,
@@ -30,7 +30,7 @@ export class VinculoService {
     });
   }
 
-  async create(vinculoData: Partial<Vinculo>): Promise<Vinculo> {
+  async create(vinculoData: Partial<Ownership>): Promise<Ownership> {
     const vinculo = this.vinculoRepository.create(vinculoData);
     return await this.vinculoRepository.save(vinculo);
   }
@@ -41,7 +41,7 @@ export class VinculoService {
     });
   }
 
-  async findBySujetoAndActivo(spoId: number): Promise<Vinculo[]> {
+  async findBySujetoAndActivo(spoId: number): Promise<Ownership[]> {
     return await this.vinculoRepository.find({
       where: {
         vso_spo_id: spoId,

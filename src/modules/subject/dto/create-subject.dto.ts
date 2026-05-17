@@ -1,7 +1,7 @@
 import { IsString, IsNotEmpty, MaxLength } from 'class-validator';
 import { IsCuit } from '../../../common/validators/cuit.validator';
 
-export class CreateSujetoDto {
+export class CreateSubjectDto {
   @IsCuit()
   @IsString()
   @IsNotEmpty({ message: 'El CUIT es obligatorio' })

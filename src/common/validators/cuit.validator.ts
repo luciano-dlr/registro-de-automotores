@@ -15,7 +15,7 @@ export function IsCuit(validationOptions?: ValidationOptions) {
           if (typeof value !== 'string') {
             return false;
           }
-          return validarCuit(value);
+          return validateCuit(value);
         },
       },
     });
@@ -23,7 +23,7 @@ export function IsCuit(validationOptions?: ValidationOptions) {
 }
 
 
-export function validarCuit(cuit: string): boolean {
+export function validateCuit(cuit: string): boolean {
   if (!cuit || typeof cuit !== 'string') {
     return false;
   }
@@ -39,7 +39,7 @@ export function validarCuit(cuit: string): boolean {
   }
 
   const base = cleanCuit.substring(0, 10);
-  const verificador = parseInt(cleanCuit.charAt(10), 10);
+  const verif = parseInt(cleanCuit.charAt(10), 10);
 
   const multiplicadores = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
 
@@ -50,15 +50,15 @@ export function validarCuit(cuit: string): boolean {
 
   const resto = suma % 11;
 
-  let digitoEsperado: number;
+  let correctNumber: number;
   if (resto === 0) {
-    digitoEsperado = 0;
+    correctNumber = 0;
   } else if (resto === 1) {
-    digitoEsperado = 9;
+    correctNumber = 9;
   } else {
-    digitoEsperado = 11 - resto;
+    correctNumber = 11 - resto;
   }
 
-  return verificador === digitoEsperado;
+  return verif === correctNumber;
 }
 

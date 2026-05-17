@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Sujeto } from '../modules/sujetos/entities/sujeto.entity';
-import { ObjetoDeValor } from '../modules/objeto-valor/entities/objeto-valor.entity';
-import { Automotor } from '../modules/automotores/entities/automotor.entity';
-import { Vinculo } from '../modules/vinculo/entities/vinculo.entity';
+import { Subject } from '../modules/subject/entities/subject.entity';
+import { ObjectValue } from '../modules/object-value/entities/object-value.entity';
+import { Vehicle } from '../modules/vehicles/entities/vehicle.entity';
+import { Ownership } from '../modules/ownership/entities/ownership.entity';
 
 @Module({
   imports: [
@@ -20,7 +20,7 @@ import { Vinculo } from '../modules/vinculo/entities/vinculo.entity';
         database: configService.get<string>('DB_NAME'),
         synchronize: true,
         logging: configService.get<string>('NODE_ENV') === 'development',
-        entities: [Sujeto, ObjetoDeValor, Automotor, Vinculo],
+        entities: [Subject, ObjectValue, Vehicle, Ownership],
       }),
     }),
   ],

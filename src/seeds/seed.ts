@@ -1,8 +1,8 @@
 import { DataSource } from 'typeorm';
-import { Sujeto } from '../modules/sujetos/entities/sujeto.entity';
-import { ObjetoDeValor } from '../modules/objeto-valor/entities/objeto-valor.entity';
-import { Automotor } from '../modules/automotores/entities/automotor.entity';
-import { Vinculo } from '../modules/vinculo/entities/vinculo.entity';
+import { Subject } from '../modules/subject/entities/subject.entity';
+import { ObjectValue } from '../modules/object-value/entities/object-value.entity';
+import { Vehicle } from '../modules/vehicles/entities/vehicle.entity';
+import { Ownership } from '../modules/ownership/entities/ownership.entity';
 
 const dataSource = new DataSource({
   type: 'postgres',
@@ -12,7 +12,7 @@ const dataSource = new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   synchronize: false,
-  entities: [Sujeto, ObjetoDeValor, Automotor, Vinculo],
+  entities: [Subject, ObjectValue, Vehicle, Ownership],
 });
 
 const sujetosData = [
@@ -60,10 +60,10 @@ async function seed() {
   await dataSource.initialize();
   console.log(' Conexión a DB establecida');
 
-  const sujetoRepo = dataSource.getRepository(Sujeto);
-  const objetoRepo = dataSource.getRepository(ObjetoDeValor);
-  const automotorRepo = dataSource.getRepository(Automotor);
-  const vinculoRepo = dataSource.getRepository(Vinculo);
+  const sujetoRepo = dataSource.getRepository(Subject);
+  const objetoRepo = dataSource.getRepository(ObjectValue);
+  const automotorRepo = dataSource.getRepository(Vehicle);
+  const vinculoRepo = dataSource.getRepository(Ownership);
 
   const countSujetos = await sujetoRepo.count();
   if (countSujetos > 0) {
