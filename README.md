@@ -2,177 +2,322 @@
 
 Challenge técnico Mindfactory - NestJS + TypeORM + PostgreSQL
 
-## Cómo levantar el proyecto
+---
 
-### Con Docker (recomendado) - 1 solo comando
+## Requisitos previos
+
+Antes de comenzar, asegurate de tener instalado:
+
+- **Docker Desktop** (Windows/Mac/Linux)
+- **Git** (para clonar el repositorio)
+- **nest** para ejecutar correctamente el repo
+
+Para verificar que Docker está instalado, ejecutá en tu terminal:
 
 ```bash
-# 1. Clonar el repositorio
-git clone <repo-url>
+docker --version
+docker-compose --version
+```
+
+---
+
+## Cómo levantar el proyecto (PASO A PASO)
+
+Este proyecto está diseñado para correrse **localmente** 
+
+### Paso 1: Clonar el repositorio
+
+```bash
+git clone https://github.com/luciano-dlr/registro-de-automotores.git
+```
+
+### Paso 2: Entrar a la carpeta del proyecto
+
+```bash
 cd registro-de-automotores
-
-# 2. Levantar servicios (db + api + índice único automático)
-docker compose up -d --build
-
-# 3. Verificar que esté funcionando
-curl http://localhost:3000
 ```
 
-**¡Listo!** No necesitas ejecutar nada más. El script de inicialización (`docker/postgres-init.sql`) se ejecuta automáticamente al crear la base de datos y crea:
-
-- Índice único para garantizar un solo dueño activo por vehículo
-
-### Sin Docker (desarrollo local)
+### Paso 3: Instalar dependencias
 
 ```bash
-# 1. Instalar dependencias
 npm install
-
-# 2. Levantar PostgreSQL con Docker (solo la db)
-docker run -d --name automotores_db \
-  -e POSTGRES_DB=automotores_db \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -p 5432:5432 \
-  -v $(pwd)/docker/postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql:ro \
-  postgres:16
-
-# 3. Crear archivo .env (copiar de .env.example)
-cp .env.example .env
-
-# 4. Ejecutar la API
-npm run start:dev
-
-# La API estará disponible en http://localhost:3000
 ```
 
-## Cómo correr los tests
+### Paso 4: Levantar PostgreSQL con Docker
+
+Este comando levanta solo la base de datos (no la API):
 
 ```bash
+docker compose up -d
+```
+
+Este comando:
+
+- Levanta PostgreSQL en el puerto 5432
+- Crea la base de datos `automotores_db`
+- Ejecuta el script `postgres-init.sql` que crea el índice único
+
+### Paso 5: Crear el archivo .env
+
+## Con las sguientes Credenciales configuradas
+
+| Variable    | Valor por defecto           |
+| ----------- | --------------------------- |
+| DB_HOST     | localhost                   |
+| DB_PORT     | 5432                        |
+| DB_USER     | postgres                    |
+| DB_PASSWORD | postgres                    |
+| DB_NAME     | automotores_db              |
+| PORT        | 3000                        |
+| NODE_ENV.   | development                 |
+
+**Alternativa , comando de copiar info en example Windows:**
+
+```cmd
+copy .env.example .env
+```
+
+**Mac/Linux:**
+
+```bash
+cp .env.example .env
+```
+
+### Paso 6: Correr la API en modo desarrollo
+
+```bash
+npm run start:dev
+```
+
+La API está corriendo en **http://localhost:3000**
+
+### Paso 7: Acceder a Swagger (interfaz visual)
+
+Abrí en tu navegador:
+
+```
+http://localhost:3000/api/docs
+```
+
+Desde ahí podés probar todos los endpoints haciendo click en "Try it out".
+
+Desde Swagger podés probar todos los endpoints haciendo click en "Try it out".
+
+---
+
+## ¿Querés correr los tests?
+
+````bash
 # Todos los tests
 npm run test
 
-# Tests con coverage
-npm run test:cov
 
-# Tests en modo watch
-npm run test:watch
-```
+---
 
-## Endpoints principales
+## Endpoints disponibles
 
-| Método   | Ruta                                    | Descripción                              |
-| -------- | --------------------------------------- | ---------------------------------------- |
-| `POST`   | `/api/sujetos`                          | Crear un sujeto (dueño)                  |
-| `GET`    | `/api/sujetos`                          | Listar todos los sujetos                 |
-| `GET`    | `/api/sujetos/by-cuit?cuit=20XXXXXXXX0` | Buscar sujeto por CUIT                   |
-| `GET`    | `/api/automotores`                      | Listar automotores con dueño actual      |
-| `GET`    | `/api/automotores/:dominio`             | Ver detalle de un automotor              |
-| `POST`   | `/api/automotores`                      | Crear automotor + asignar dueño          |
-| `PUT`    | `/api/automotores/:dominio`             | Actualizar automotor y/o reasignar dueño |
-| `DELETE` | `/api/automotores/:dominio`             | Eliminar automotor en cascada            |
-
-### Ejemplos de uso
-
-#### Crear un sujeto (dueño):
+### Crear un sujeto (dueño)
 
 ```bash
 curl -X POST http://localhost:3000/api/sujetos \
   -H "Content-Type: application/json" \
   -d '{
-    "spo_cuit": "27123456780",
-    "spo_denominacion": "Juan Pérez"
+    "spo_cuit": "20401093495",
+    "spo_denominacion": "Luciano Gómez"
   }'
-```
+````
 
-#### Crear un automotor:
+### Crear un automotor
 
 ```bash
 curl -X POST http://localhost:3000/api/automotores \
   -H "Content-Type: application/json" \
   -d '{
-    "dominio": "ABC123",
+    "dominio": "ABC311",
     "numeroChasis": "ABC123456789",
     "numeroMotor": "M123456789",
     "color": "Rojo",
-    "fechaFabricacion": 202301,
-    "cuitDueno": "27123456780"
+    "fechaFabricacion": 202605,
+    "cuitDueno": "20401093495"
   }'
 ```
 
-#### Listar automotores:
+### Listar todos los automotores
 
 ```bash
 curl http://localhost:3000/api/automotores
 ```
 
-## Credenciales
+### Ver detalle de un automotor por dominio
 
-| Variable    | Valor por defecto |
-| ----------- | ----------------- |
-| DB_HOST     | localhost         |
-| DB_PORT     | 5432              |
-| DB_USER     | postgres          |
-| DB_PASSWORD | postgres          |
-| DB_NAME     | automotores_db    |
-| PORT        | 3000              |
+```bash
+curl http://localhost:3000/api/automotores/ABC311
+```
+
+### Actualizar un automotor (ej: cambiar color)
+
+```bash
+curl -X PUT http://localhost:3000/api/automotores/ABC311 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "color": "Verde Oscuro"
+  }'
+```
+
+### Reasignar dueño de un automotor
+
+```bash
+curl -X PUT http://localhost:3000/api/automotores/ABC311 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cuitDueno": "27123456780"
+  }'
+```
+
+### Eliminar un automotor (cascada)
+
+```bash
+curl -X DELETE http://localhost:3000/api/automotores/ABC311
+```
+
+### Buscar sujeto por CUIT
+
+```bash
+curl "http://localhost:3000/api/sujetos/by-cuit?cuit=20401093495"
+```
+
+---
+
+## Endpoints con validación (deben devolver 422 si fallan)
+
+### Dominio inválido
+
+```bash
+curl -X POST http://localhost:3000/api/automotores \
+  -H "Content-Type: application/json" \
+  -d '{
+    "dominio": "INVALID",
+    "fechaFabricacion": 202605,
+    "cuitDueno": "20401093495"
+  }'
+```
+
+### CUIT inválido
+
+```bash
+curl -X POST http://localhost:3000/api/sujetos \
+  -H "Content-Type: application/json" \
+  -d '{
+    "spo_cuit": "00000000000",
+    "spo_denominacion": "Test"
+  }'
+```
+
+### Fecha de fabricación futura (RECHAZADA)
+
+```bash
+curl -X POST http://localhost:3000/api/automotores \
+  -H "Content-Type: application/json" \
+  -d '{
+    "dominio": "FUT123",
+    "fechaFabricacion": 202702,
+    "cuitDueno": "20401093495"
+  }'
+```
+
+## ¿Qué hace automáticamente el script de inicio?
+
+Al levantar PostgreSQL, se ejecuta automáticamente el script `docker/postgres-init.sql` que crea:
+
+- **Índice único** `uq_vso_owner_actual` para garantizar que un vehículo tenga un solo dueño activo
+
+Este índice complementa la lógica de negocio en el código y protege la integridad de los datos a nivel de base de datos.
+
+---
+
+## Credenciales configuradas
+
+| Variable    | Valor por defecto           |
+| ----------- | --------------------------- |
+| DB_HOST     | db (interno del contenedor) |
+| DB_PORT     | 5432                        |
+| DB_USER     | postgres                    |
+| DB_PASSWORD | postgres                    |
+| DB_NAME     | automotores_db              |
+| PORT        | 3000                        |
+
+---
 
 ## Validaciones implementadas
 
 - **Dominio**: Formato `AAA999` (ej: ABC123) o `AA999AA` (ej: AB123CD)
 - **CUIT**: 11 dígitos con dígito verificador (algoritmo módulo 11)
-- **Fecha de fabricación**: Formato `YYYYMM`, mes 01-12, no futura
+- **Fecha de fabricación**: Formato `YYYYMM`, mes 01-12, **NO puede ser futura**
+- **Dueño único activo**: Al crear/reasignar, se cierra el vínculo anterior
 
-Errores de validación retornan `422 Unprocessable Entity`.
+Los errores de validación retornan `422 Unprocessable Entity` con mensaje descriptivo.
 
-## Arquitectura
+---
 
-```
-│ ├── modules/
-│ │ ├── subject/
-│ │ │ ├── subjects.module.ts
-│ │ │ ├── subjects.controller.ts
-│ │ │ │ ├── subjects.service.ts
-│ │ │ ├── dto/
-│ │ │ │ ├── create-subject.dto.ts
-│ │ │ │ └── query-cuit.dto.ts
-│ │ │ └── entities/
-│ │ │ └── subject.entity.ts @Entity('Sujeto')
-│ │ ├── object-value/
-│ │ │ └── entities/
-│ │ │ └── object-value.entity.ts @Entity('Objeto_De_Valor')
-│ │ ├── vehicles/
-│ │ │ ├── vehicles.module.ts
-│ │ │ ├── vehicles.controller.ts
-│ │ │ ├── vehicles.service.ts
-│ │ │ ├── dto/
-│ │ │ │ ├── create-vehicle.dto.ts
-│ │ │ │ └── update-vehicle.dto.ts
-│ │ │ └── entities/
-│ │ │ └── vehicle.entity.ts @Entity('Automotores')
-│ │ └── ownership/
-│ │ ├── ownership.module.ts
-│ │ ├── ownership.service.ts
-│ │ └── entities/
-│ │ └── ownership.entity.ts @Entity('Vinculo_Sujeto_Objeto')
-```
+## Desarrollo local (SIN Docker) - Solo para desarrolladores
 
-## Decisiones de diseño
+**IMPORTANTE:** Este modo es solo si querés modificar el código y ver los cambios en tiempo real. **No es necesario** para usar la API.
 
-Ver [docs/DECISION_LOG.md](docs/DECISION_LOG.md) para más detalles sobre las decisiones técnicas.
-
-## Docker
+### Requisitos previos (Node.js instalado):
 
 ```bash
-# Ver logs de la API
-docker compose logs -f api
+# 1. Instalar NestJS CLI globalmente
+npm install -g @nestjs/cli
+
+# 2. Instalar todas las dependencias del proyecto
+npm install
+
+
+**Nota:** Si ves errores de "nest not found", asegurate de haber instalado `@nestjs/cli` globalmente como se indica en el paso 1.
+
+---
+
+## Problemas comunes
+
+### "Docker command not found"
+
+→ Instalá Docker Desktop desde https://www.docker.com/products/docker-desktop
+
+### "Port 3000 already in use"
+
+```bash
+# Ver qué está usando el puerto 3000
+netstat -ano | findstr :3000
+
+# O cambiar el puerto en docker-compose.yml
+```
+
+### "Database connection refused"
+
+```bash
+# Verificar que PostgreSQL esté corriendo
+docker compose ps
 
 # Ver logs de la base de datos
-docker compose logs -f db
-
-# Detener servicios
-docker compose down
-
-# Eliminar volúmenes (resetear DB)
-docker compose down -v
+docker compose logs db
 ```
+
+---
+
+## Arquitectura del proyecto
+
+```
+src/
+├── modules/
+│   ├── subject/         → Entidad Sujeto (dueños)
+│   ├── object-value/    → Entidad Objeto_De_Valor
+│   ├── vehicles/        → Entidad Automotores
+│   └── ownership/       → Entidad Vinculo_Sujeto_Objeto
+├── common/
+│   ├── validators/      → Validadores de dominio, CUIT, fecha
+│   └── filters/         → Filtro de excepciones HTTP
+├── database/            → Configuración de TypeORM
+└── seeds/               → Datos de prueba
+```
+
+Para más detalles sobre decisiones técnicas, ver [docs/DECISION_LOG.md](docs/DECISION_LOG.md).
