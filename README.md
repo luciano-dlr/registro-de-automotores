@@ -102,8 +102,6 @@ Abrí en tu navegador:
 http://localhost:3000/api/docs
 ```
 
-Desde ahí podés probar todos los endpoints haciendo click en "Try it out".
-
 Desde Swagger podés probar todos los endpoints haciendo click en "Try it out".
 
 ---
