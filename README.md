@@ -57,9 +57,9 @@ Este comando:
 - Crea la base de datos `automotores_db`
 - Ejecuta el script `postgres-init.sql` que crea el índice único
 
-### Paso 5: Crear el archivo .env
+### Paso 5: Crear el archivo .env en windows o puedes crearlo manualmente
 
-```Crear archivo .env en windows por comando o crearlo manualmente
+```
 echo. > .env
 ```
 ## Con las sguientes Credenciales configuradas
