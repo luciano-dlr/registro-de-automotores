@@ -70,7 +70,7 @@ DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=postgres
 DB_NAME=automotores_db
-PORT=3001
+PORT=3000
 NODE_ENV=development
 ```
 
