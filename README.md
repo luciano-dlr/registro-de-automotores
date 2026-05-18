@@ -59,17 +59,20 @@ Este comando:
 
 ### Paso 5: Crear el archivo .env
 
+```Crear archivo .env en windows por comando o crearlo manualmente
+echo. > .env
+```
 ## Con las sguientes Credenciales configuradas
 
-| Variable    | Valor por defecto           |
-| ----------- | --------------------------- |
-| DB_HOST     | localhost                   |
-| DB_PORT     | 5432                        |
-| DB_USER     | postgres                    |
-| DB_PASSWORD | postgres                    |
-| DB_NAME     | automotores_db              |
-| PORT        | 3000                        |
-| NODE_ENV.   | development                 |
+```Contenido .env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=automotores_db
+PORT=3001
+NODE_ENV=development
+```
 
 **Alternativa , comando de copiar info en example Windows:**
 
